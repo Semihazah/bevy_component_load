@@ -4,6 +4,7 @@ use bevy::{
     ecs::{component::Component, system::Command},
     prelude::*,
     reflect::FromReflect,
+    utils::HashSet,
 };
 use bevy_loading::prelude::AssetsLoading;
 
@@ -53,11 +54,11 @@ pub fn unload_data_system<L: Loadable>(
 
 pub trait LoadableEx: Component + Clone {
     fn load_data(&mut self, world: &mut World) -> anyhow::Result<()>;
-    fn unload_data(&mut self);
+    fn unload_data(&mut self, world: &mut World);
 }
 
 struct LoadCommand<T: LoadableEx> {
-    loadables: Vec<Entity>,
+    loadables: HashSet<Entity>,
     phantom_data: PhantomData<T>,
 }
 
@@ -73,11 +74,26 @@ impl<T: LoadableEx> Command for LoadCommand<T> {
     }
 }
 
+struct UnloadCommand<T: LoadableEx> {
+    unloadables: HashSet<Entity>,
+    phantom_data: PhantomData<T>,
+}
+
+impl<T: LoadableEx> Command for UnloadCommand<T> {
+    fn write(self, world: &mut World) {
+        for &entity in self.unloadables.iter() {
+            let mut component = world.get_mut::<T>(entity).unwrap().clone();
+            component.unload_data(world);
+            world.entity_mut(entity).insert(component);
+        }
+    }
+}
+
 pub fn load_ex_data_system<L: LoadableEx>(
     mut commands: Commands,
     query: Query<Entity, (With<L>, With<IsLoaded>, Or<(Added<IsLoaded>, Added<L>)>)>,
 ) {
-    let load_list: Vec<Entity> = query.iter().collect();
+    let load_list: HashSet<Entity> = query.iter().collect();
 
     if !load_list.is_empty() {
         commands.add(LoadCommand::<L> {
@@ -88,13 +104,23 @@ pub fn load_ex_data_system<L: LoadableEx>(
 }
 
 pub fn unload_ex_data_system<L: LoadableEx>(
+    mut commands: Commands,
     removed: RemovedComponents<IsLoaded>,
-    mut query: Query<&mut L>,
+    query: Query<Entity, With<L>>,
 ) {
-    for entity in removed.iter() {
-        if let Ok(mut load_data) = query.get_mut(entity) {
-            load_data.unload_data();
-        }
+    let removed_list: HashSet<Entity> = removed.iter().collect();
+    let unloadable_list: HashSet<Entity> = query.iter().collect();
+
+    let intersection: HashSet<Entity> = removed_list
+        .intersection(&unloadable_list)
+        .cloned()
+        .collect();
+
+    if !intersection.is_empty() {
+        commands.add(UnloadCommand::<L> {
+            unloadables: intersection,
+            phantom_data: PhantomData,
+        })
     }
 }
 
