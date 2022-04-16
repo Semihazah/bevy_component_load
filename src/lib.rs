@@ -7,12 +7,16 @@ use bevy::{
     utils::HashSet,
 };
 use bevy_loading::prelude::AssetsLoading;
+use bevy_ref_component::AddRefComponentExt;
 
 pub struct BevyComponentLoadPlugin;
 
 impl Plugin for BevyComponentLoadPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<IsLoaded>();
+        app
+        .register_type::<IsLoaded>()
+        .add_ref_component_type::<IsLoaded>()
+        ;
     }
 }
 
@@ -131,15 +135,15 @@ pub trait AppRegisterLoadExt {
 
 impl AppRegisterLoadExt for App {
     fn register_loadable<L: Loadable>(&mut self) -> &mut Self {
-        self.add_system_to_stage(CoreStage::PostUpdate, load_data_system::<L>.system())
-            .add_system_to_stage(CoreStage::PostUpdate, unload_data_system::<L>.system());
+        self.add_system_to_stage(CoreStage::PostUpdate, load_data_system::<L>)
+            .add_system_to_stage(CoreStage::PostUpdate, unload_data_system::<L>);
 
         self
     }
 
     fn register_loadable_ex<L: LoadableEx>(&mut self) -> &mut Self {
-        self.add_system_to_stage(CoreStage::PostUpdate, load_ex_data_system::<L>.system())
-            .add_system_to_stage(CoreStage::PostUpdate, unload_ex_data_system::<L>.system());
+        self.add_system_to_stage(CoreStage::PostUpdate, load_ex_data_system::<L>)
+            .add_system_to_stage(CoreStage::PostUpdate, unload_ex_data_system::<L>);
 
         self
     }
