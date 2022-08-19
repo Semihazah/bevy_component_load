@@ -5,11 +5,15 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-bevy = "0.7.0"
-anyhow = "1.0.52"
-bevy_loading = "0.2.0"
-bevy_ref_component = {git = "https://github.com/Semihazah/bevy_ref_component.git" }
+[profile.dev]
+opt-level = 1
 
-[patch."https://github.com/Semihazah/bevy_ref_component.git"]
-bevy_ref_component = {path = "C:/Users/ZHuds/GitHub/bevy_ref_component"}
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+bevy = {version = "0.8.0", default-features = false, features = ["bevy_asset"]}
+anyhow = "1.0.52"
+iyes_progress = {version = "0.5.0", features = ["assets"]}
+#iyes_progress = {git = "https://github.com/shanesveller/iyes_progress.git", branch = "shanesveller/iyes-loopless-0.6", features = ["assets"]}
+bevy_ref_component = {git = "https://github.com/Semihazah/bevy_ref_component.git" }

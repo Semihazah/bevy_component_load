@@ -6,17 +6,13 @@ use bevy::{
     reflect::FromReflect,
     utils::HashSet,
 };
-use bevy_loading::prelude::AssetsLoading;
-use bevy_ref_component::AddRefComponentExt;
+use iyes_progress::prelude::AssetsLoading;
 
 pub struct BevyComponentLoadPlugin;
 
 impl Plugin for BevyComponentLoadPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .register_type::<IsLoaded>()
-        .add_ref_component_type::<IsLoaded>()
-        ;
+        app.register_type::<IsLoaded>();
     }
 }
 
