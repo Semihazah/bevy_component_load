@@ -14,6 +14,11 @@ opt-level = 3
 [dependencies]
 bevy = {version = "0.8.0", default-features = false, features = ["bevy_asset"]}
 anyhow = "1.0.52"
-iyes_progress = {version = "0.5.0", features = ["assets"]}
+iyes_progress = {version = "0.5.0", features = ["assets"], optional = true}
 #iyes_progress = {git = "https://github.com/shanesveller/iyes_progress.git", branch = "shanesveller/iyes-loopless-0.6", features = ["assets"]}
 bevy_ref_component = {git = "https://github.com/Semihazah/bevy_ref_component.git" }
+
+bevy-trait-query = "0.0.2"
+
+[features]
+asset_tracking = ["dep:iyes_progress"]
