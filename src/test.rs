@@ -6,7 +6,7 @@ use crate::{BevyComponentLoadPlugin, Loadable, AppRegisterLoadExt, IsLoaded};
 fn setup_app(app: &mut App) {
     app
     .add_plugins(MinimalPlugins)
-    .add_plugin(AssetPlugin)
+    .add_plugin(AssetPlugin::default())
     .add_plugin(BevyComponentLoadPlugin)
     ;
 
@@ -24,8 +24,7 @@ fn test_loading() -> anyhow::Result<()>{
     app
     .register_loadable::<Foo>();
     let foo_entity = app.world
-    .spawn()
-    .insert(Foo::default())
+    .spawn(Foo::default())
     .insert(IsLoaded)
     .id();
 
