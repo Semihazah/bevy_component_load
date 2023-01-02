@@ -1,8 +1,4 @@
-use bevy::{
-    ecs::{component::Component},
-    prelude::*,
-    reflect::FromReflect,
-};
+use bevy::{ecs::component::Component, prelude::*, reflect::FromReflect};
 use bevy_trait_query::{All, RegisterExt};
 
 #[cfg(feature = "asset_tracking")]
@@ -16,9 +12,8 @@ pub struct BevyComponentLoadPlugin;
 impl Plugin for BevyComponentLoadPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<IsLoaded>()
-        .add_system_to_stage(CoreStage::PostUpdate, load_data)
-        .add_system_to_stage(CoreStage::PostUpdate, unload_data)
-        ;
+            .add_system_to_stage(CoreStage::PostUpdate, load_data)
+            .add_system_to_stage(CoreStage::PostUpdate, unload_data);
     }
 }
 
@@ -32,8 +27,7 @@ pub trait Loadable: 'static {
         &mut self,
         asset_server: &Res<AssetServer>,
 
-        #[cfg(feature = "asset_tracking")]
-        loading: &mut ResMut<AssetsLoading>,
+        #[cfg(feature = "asset_tracking")] loading: &mut ResMut<AssetsLoading>,
     ) -> anyhow::Result<()>;
     fn unload_data(&mut self);
 }
@@ -61,16 +55,13 @@ fn load_data(
     for loadable_entity in query.iter_mut() {
         for mut loadable in loadable_entity {
             if let Err(e) = loadable.load_data(&asset_server) {
-                eprintln!("{}", e);
+                eprintln!("{e}");
             }
         }
     }
 }
 
-fn unload_data(
-    removed: RemovedComponents<IsLoaded>,
-    mut query: Query<All<&mut dyn Loadable>>,
-) {
+fn unload_data(removed: RemovedComponents<IsLoaded>, mut query: Query<All<&mut dyn Loadable>>) {
     for entity in removed.iter() {
         if let Ok(loadable_comps) = query.get_mut(entity) {
             for mut loadable in loadable_comps {
@@ -110,8 +101,8 @@ pub trait AppRegisterLoadExt {
 impl AppRegisterLoadExt for App {
     fn register_loadable<L: Loadable + Component>(&mut self) -> &mut Self {
         self.register_component_as::<dyn Loadable, L>();
-/*         self.add_system_to_stage(CoreStage::PostUpdate, load_data_system::<L>)
-            .add_system_to_stage(CoreStage::PostUpdate, unload_data_system::<L>); */
+        /*         self.add_system_to_stage(CoreStage::PostUpdate, load_data_system::<L>)
+        .add_system_to_stage(CoreStage::PostUpdate, unload_data_system::<L>); */
 
         self
     }
