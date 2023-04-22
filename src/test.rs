@@ -14,7 +14,7 @@ fn setup_app(app: &mut App) {
             .continue_to(LoadingState::NotLoading)
             .track_assets(),
     )
-    .add_state(LoadingState::Loading);
+    .add_state::<LoadingState>();
 }
 
 #[test]
@@ -83,8 +83,9 @@ impl Loadable for Foo {
 }
 
 #[cfg(feature = "asset_tracking")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+#[derive(States, Clone, Copy, PartialEq, Eq, Debug, Hash, Default)]
 enum LoadingState {
+    #[default]
     NotLoading,
     Loading,
 }

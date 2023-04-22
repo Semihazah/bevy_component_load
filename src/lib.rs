@@ -12,8 +12,9 @@ pub struct BevyComponentLoadPlugin;
 impl Plugin for BevyComponentLoadPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<IsLoaded>()
-            .add_system_to_stage(CoreStage::PostUpdate, load_data)
-            .add_system_to_stage(CoreStage::PostUpdate, unload_data);
+            .add_system(load_data.in_base_set(CoreSet::PostUpdate))
+            .add_system(unload_data.in_base_set(CoreSet::PostUpdate))
+        ;
     }
 }
 
@@ -61,7 +62,7 @@ fn load_data(
     }
 }
 
-fn unload_data(removed: RemovedComponents<IsLoaded>, mut query: Query<All<&mut dyn Loadable>>) {
+fn unload_data(mut removed: RemovedComponents<IsLoaded>, mut query: Query<All<&mut dyn Loadable>>) {
     for entity in removed.iter() {
         if let Ok(loadable_comps) = query.get_mut(entity) {
             for mut loadable in loadable_comps {
